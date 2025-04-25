@@ -3,20 +3,26 @@
 # Path to the .zshrc file
 ZSHRC_FILE="profile.sh"
 
-# Make a backup of .zshrc before modifying it
+# Create a backup of the original file
 cp "$ZSHRC_FILE" "$ZSHRC_FILE.bak"
 
-# Use awk to remove the block of text
-awk '
-BEGIN { block_detected = 0 }
-/^export PYENV_ROOT="\$HOME\/\.pyenv"$/ { block_detected = 1 }
-/^fi$/ && block_detected == 1 { block_detected = 0; next }
-block_detected == 1 { next }
-{ print }
-' "$ZSHRC_FILE" > "${ZSHRC_FILE}.temp"
+# Determine the correct `sed -i` usage
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # macOS: Use `sed -i ''`
+  SED_COMMAND="sed -i ''"
+else
+  # Linux: Use `sed -i`
+  SED_COMMAND="sed -i"
+fi
 
-# Replace the original .zshrc with the modified version
-mv "${ZSHRC_FILE}.temp" "$ZSHRC_FILE"
+# Use sed to remove the pyenv block
+# This matches and removes:
+# - `export PYENV_ROOT="$HOME/.pyenv"`
+# - `export PATH="$PYENV_ROOT/bin:$PATH"`
+# - The `if` block (`if ... fi`) that initializes pyenv
+$SED_COMMAND '/^export PYENV_ROOT="\$HOME\/.pyenv"$/d' "$ZSHRC_FILE"
+$SED_COMMAND '/^export PATH="\$PYENV_ROOT\/bin:\$PATH"$/d' "$ZSHRC_FILE"
+$SED_COMMAND '/^if command -v pyenv 1>\/dev\/null 2>&1; then/,/^fi/d' "$ZSHRC_FILE"
 
-echo ".zshrc has been updated and the specified content has been removed."
+echo ".zshrc has been updated and the specified pyenv block has been removed."
 echo "A backup of the original file has been saved as .zshrc.bak."
