@@ -1,0 +1,9 @@
+We have an application (tlo-python-app1) running in the Konvoy General Cluster (tlo-python namespace). Despite our efforts to integrate, we're unable to fully ingest all telemetry data (logs, metrics, traces) into Dynatrace:
+
+Logs: Seem to be ingested, but querying them results in a "permission denied" error.
+Metrics: Tried enabling Prometheus metrics collection, but no data is available in Dynatrace.
+Traces: Used the OneAgent SDK (Autoinstrumentator), but no trace data is appearing.
+Request:
+Please provide clear steps or guidance on how to correctly ingest all telemetry data (logs, metrics, and traces) from this application into Dynatrace.
+
+Let us know if specific configurations or changes are required on our side.
