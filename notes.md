@@ -1,36 +1,39 @@
-# Python K8s Deployments
+# Define the Python versions to work with
+$versions = @("3.10", "3.11", "3.12")
+# Initialize an empty array to store the report
+$report = @()
 
-Welcome to the **Python K8s Deployments** documentation! This page explains the easiest way to set up and deploy your Python application to Kubernetes using the **TLO-Python repository template**.
+# Loop through each Python version
+foreach ($version in $versions) {
+    Write-Host "Processing Python $version..." -ForegroundColor Cyan
 
----
+    # Install the Python version with pyenv
+    try {
+        pyenv install $version -s  # The `-s` flag skips installation if already installed
+        pyenv local $version
+    } catch {
+        Write-Host "Failed to install or set Python $version." -ForegroundColor Red
+        $report += @{"Version" = $version; "Status" = "Failed to install or set"}
+        continue
+    }
 
-## Quick Start: Leverage the TLO-Python Template
+    # Install `cowsay`, check Python version, and run cowsay
+    try {
+        python -m pip install cowsay
+        $pythonVersion = python --version
+        python -m cowsay -t "Hello World"
+        Write-Host "Python $version is successfully set up!" -ForegroundColor Green
+        $report += @{"Version" = $version; "Status" = "Success"}
+    } catch {
+        Write-Host "Failed to configure Python $version." -ForegroundColor Red
+        $report += @{"Version" = $version; "Status" = "Failed to configure"}
+    }
+}
 
-The **TLO-Python repository template** is preconfigured for seamless deployment to both **general** and **external** Kubernetes clusters. It provides everything required for application deployment, including scripts, configurations, and CICD pipeline setup.
-
-To get started, use the [Python-TLO Template](link).
-
----
-
-### Why Use the Template?
-
-- Preconfigured Kubernetes deployment manifests  
-- Built-in CICD pipeline support for automated deployments  
-- Compatibility with internal and external clusters  
-
----
-
-## CICD Setup
-
-Instruction on how to set up the CICD pipeline is included in the **TLO-Python repository template** itself. For all pipeline configurations and deployment steps, refer directly to the template.
-
-[Access the TLO-Python Template](link)
-
----
-
-## Need Help?
-
-If you have any questions or require assistance, feel free to reach out to the **TLO-Python team**:  
-📧 Email: [tlo-python@edwardjones.com](mailto:tlo-python@edwardjones.com)
-
-📄 This documentation is intended to guide you towards leveraging our preconfigured template for smooth and efficient Kubernetes deployments.
+# Print the final report
+Write-Host "`n=== Final Report ===" -ForegroundColor Yellow
+foreach ($entry in $report) {
+    $version = $entry["Version"]
+    $status = $entry["Status"]
+    Write-Host "Python $version: $status"
+}
